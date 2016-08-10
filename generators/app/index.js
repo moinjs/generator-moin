@@ -44,6 +44,45 @@ module.exports = yeoman.Base.extend({
                 when: ({module})=> module,
                 message: 'Which folder should hold the Moin-modules?',
                 default: "modules"
+            },
+            {
+                type: 'confirm',
+                name: 'remote',
+                message: 'Do you want to activate the interconnection between moin instances?',
+                default: false
+            },
+            {
+                type: 'list',
+                name: 'netMode',
+                message: 'Client or Server Mode?',
+                default: "client",
+                when: ({remote})=>remote,
+                choices: ["client", "server"]
+            },
+            {
+                type: 'input',
+                name: 'host',
+                when: ({remote,netMode})=> remote && netMode == "client",
+                message: "Which is the host of the Server?",
+                default: "localhost"
+            },
+            {
+                type: 'input',
+                name: 'port',
+                when: ({remote})=> remote,
+                validate: (val)=> {
+                    val = parseInt(val);
+                    return val > 1024 && val < 65535 ? true : "Port must be an Integer between 1024 and 65535";
+                },
+                filter: (val)=>parseInt(val),
+                message: ({netMode})=> {
+                    if (netMode == "client") {
+                        return "Which port is the Server running on?";
+                    } else {
+                        return "On which Port should the server listen for connections?";
+                    }
+                },
+                default: 2987
             }
         ];
 
@@ -75,6 +114,15 @@ module.exports = yeoman.Base.extend({
                 if (this.props.service) {
                     config["moin-fs-watcher"].serviceFolders.push(this.destinationPath(this.props.servicePath));
                     this.create.push(this.destinationPath(this.props.servicePath));
+                }
+
+                if (!this.props.remote) {
+                    config["moin-remote-dispatcher"].active = false;
+                } else {
+                    config["moin-remote-dispatcher"].active = true;
+                    config["moin-remote-dispatcher"].mode = this.props.netMode;
+                    config["moin-remote-dispatcher"].host = this.props.host;
+                    config["moin-remote-dispatcher"].port = this.props.port;
                 }
 
                 this.config = config;
