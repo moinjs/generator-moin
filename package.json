@@ -1,6 +1,6 @@
 {
   "name": "generator-moin",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Sets up a Moin application server",
   "homepage": "http://moinjs.github.io",
   "author": {
